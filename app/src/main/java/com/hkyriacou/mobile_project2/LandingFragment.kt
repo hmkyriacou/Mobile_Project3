@@ -1,5 +1,6 @@
 package com.hkyriacou.mobile_project2
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
@@ -12,12 +13,11 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.core.widget.addTextChangedListener
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.*
+import androidx.lifecycle.Observer
+import com.hkyriacou.mobile_project2.api.WeatherItem
 import kotlinx.android.synthetic.main.fragment_landing.*
 import java.util.*
-import androidx.lifecycle.Observer
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -93,6 +93,7 @@ class LandingFragment : Fragment() {
         awayName.setText( game.teamBName )
 
     }
+    @SuppressLint("FragmentLiveDataObserve")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -119,25 +120,13 @@ class LandingFragment : Fragment() {
 //            }
 //        })
 
-        val retrofit: Retrofit = Retrofit.Builder()
-            .baseUrl("https://api.openweathermap.org/")
-            .addConverterFactory(ScalarsConverterFactory.create())
-            .build()
-        val weatherApi : WeatherApi = retrofit.create(WeatherApi::class.java)
 
-        val weatherRequest: Call<String> = weatherApi.fetchWorcesterWeather()
-
-        weatherRequest.enqueue(object : Callback<String> {
-            override fun onFailure(call: Call<String>, t: Throwable) {
-                Log.e(TAG, "Failed to fetch weather", t)
-            }
-            override fun onResponse(
-                call: Call<String>,
-                response: Response<String>
-            ){
-                Log.d(TAG, "Response received: ${response.body()}")
-            }
-        })
+        val weatherLiveData: LiveData<WeatherItem> = WeatherFetchr().fetchWorcesterWeather()
+        weatherLiveData.observe(
+            this,
+            Observer { res ->
+                Log.d(TAG, "Response received: ${res.temp}")
+            })
 
         val btnH3 : Button = view.findViewById(R.id.btn3Home)
         btnH3.setOnClickListener {
