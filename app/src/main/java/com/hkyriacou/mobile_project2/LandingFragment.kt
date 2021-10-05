@@ -1,9 +1,11 @@
 package com.hkyriacou.mobile_project2
 
+import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -124,7 +126,7 @@ class LandingFragment : Fragment() {
         awayPhotoButton = view.findViewById(R.id.away_camera) as ImageButton
         awayPhotoView = view.findViewById(R.id.away_photo) as ImageView
 
-    /*    awayPhotoButton.apply {
+        /*awayPhotoButton.apply {
             val packageManager: PackageManager = requireActivity().packageManager
             val captureImage = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             val resolvedActivity: ResolveInfo? =
@@ -151,13 +153,13 @@ class LandingFragment : Fragment() {
                 }
                 startActivityForResult(captureImage, 1)
             }
-        }
-*/
+        }*/
 
-        awayPhotoButton.setOnClickListener {
+
+       /* awayPhotoButton.setOnClickListener {
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            startActivityForResult(intent, 1)
-        }
+            startActivityForResult(intent, REQUEST_PHOTO)
+        }*/
 
 
 
@@ -274,6 +276,41 @@ class LandingFragment : Fragment() {
         callbacks = null
     }
 
+    override fun onStart(){
+        super.onStart()
+
+       /* awayPhotoButton.setOnClickListener {
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            startActivityForResult(intent, 1)
+        }*/
+
+        awayPhotoButton.apply {
+                val packageManager: PackageManager = requireActivity().packageManager
+                val captureImage = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                val resolvedActivity: ResolveInfo? =
+                    packageManager.resolveActivity(captureImage,
+                        PackageManager.MATCH_DEFAULT_ONLY)
+                if (resolvedActivity == null) {
+                    isEnabled = false
+                }
+                setOnClickListener {
+                    captureImage.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                    val cameraActivities: List<ResolveInfo> =
+                        packageManager.queryIntentActivities(captureImage,
+                            PackageManager.MATCH_DEFAULT_ONLY)
+                    for (cameraActivity in cameraActivities) {
+                        requireActivity().grantUriPermission(
+                            cameraActivity.activityInfo.packageName,
+                            photoUri,
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                    }
+                    startActivityForResult(captureImage, REQUEST_PHOTO)
+                }
+            }
+        }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Log.d(TAG,"hey whats up")
+    }
     override fun onStop(){
         super.onStop()
         game.teamAName = homeName.text.toString()
