@@ -79,6 +79,9 @@ class LandingFragment : Fragment() {
 
 
         super.onCreate(savedInstanceState)
+
+
+
         game = Game()
         arguments?.let {
             param1 = if(arguments?.getSerializable(ARG_PARAM1) == null){game.id}
@@ -99,9 +102,8 @@ class LandingFragment : Fragment() {
                     this.game=game
                     photoFile = gameDetailViewModel.getPhotoFile(game)
                     photoUri = FileProvider.getUriForFile(requireActivity(),
-                        "com.bignerdranch.android.criminalintent.fileprovider",
+                        "com.hkyriacou.mobile_project2.fileprovider",
                         photoFile)
-
                     updateUI()
                 }
             }
@@ -156,10 +158,6 @@ class LandingFragment : Fragment() {
         }*/
 
 
-       /* awayPhotoButton.setOnClickListener {
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            startActivityForResult(intent, REQUEST_PHOTO)
-        }*/
 
 
 
@@ -283,7 +281,12 @@ class LandingFragment : Fragment() {
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             startActivityForResult(intent, 1)
         }*/
-
+ /*       homePhotoButton.setOnClickListener {
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            startActivityForResult(intent, REQUEST_PHOTO)
+        }
+*/
+        //DONT ADD TO DATABASE IF WE LEAVE TO CAMERA
         awayPhotoButton.apply {
                 val packageManager: PackageManager = requireActivity().packageManager
                 val captureImage = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
@@ -294,6 +297,7 @@ class LandingFragment : Fragment() {
                     isEnabled = false
                 }
                 setOnClickListener {
+
                     captureImage.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
                     val cameraActivities: List<ResolveInfo> =
                         packageManager.queryIntentActivities(captureImage,
