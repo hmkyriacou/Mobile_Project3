@@ -18,6 +18,11 @@ import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.fragment_landing.*
 import java.util.*
 import androidx.lifecycle.Observer
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.scalars.ScalarsConverterFactory
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -113,6 +118,26 @@ class LandingFragment : Fragment() {
 //
 //            }
 //        })
+
+        val retrofit: Retrofit = Retrofit.Builder()
+            .baseUrl("https://api.openweathermap.org/")
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .build()
+        val weatherApi : WeatherApi = retrofit.create(WeatherApi::class.java)
+
+        val weatherRequest: Call<String> = weatherApi.fetchWorcesterWeather()
+
+        weatherRequest.enqueue(object : Callback<String> {
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                Log.e(TAG, "Failed to fetch weather", t)
+            }
+            override fun onResponse(
+                call: Call<String>,
+                response: Response<String>
+            ){
+                Log.d(TAG, "Response received: ${response.body()}")
+            }
+        })
 
         val btnH3 : Button = view.findViewById(R.id.btn3Home)
         btnH3.setOnClickListener {
