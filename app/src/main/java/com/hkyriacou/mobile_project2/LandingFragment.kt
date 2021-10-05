@@ -15,6 +15,8 @@ import android.widget.TextView
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.*
 import androidx.lifecycle.Observer
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.hkyriacou.mobile_project2.api.WeatherItem
 import kotlinx.android.synthetic.main.fragment_landing.*
 import org.w3c.dom.Text
@@ -47,6 +49,7 @@ class LandingFragment : Fragment() {
     private val gameDetailViewModel: GameDetailViewModel by lazy {
         ViewModelProviders.of(this).get(GameDetailViewModel::class.java)
     }
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     interface Callbacks {
         fun moveToSavingFragment()
@@ -64,6 +67,7 @@ class LandingFragment : Fragment() {
 
 
         super.onCreate(savedInstanceState)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         game = Game()
         arguments?.let {
             param1 = if(arguments?.getSerializable(ARG_PARAM1) == null){game.id}
