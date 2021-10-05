@@ -17,6 +17,7 @@ import androidx.lifecycle.*
 import androidx.lifecycle.Observer
 import com.hkyriacou.mobile_project2.api.WeatherItem
 import kotlinx.android.synthetic.main.fragment_landing.*
+import org.w3c.dom.Text
 import java.util.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -126,6 +127,9 @@ class LandingFragment : Fragment() {
             this,
             Observer { res ->
                 Log.d(TAG, "Response received: ${res.temp}")
+                val weatherTxt : TextView = view.findViewById(R.id.weatherInfo)
+                val tempFaren : Double = (res.temp.toDouble() - 273.15) * 9/5 + 32
+                weatherTxt.setText("Worcester: ${tempFaren}ºF")
             })
 
         val btnH3 : Button = view.findViewById(R.id.btn3Home)
