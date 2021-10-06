@@ -30,7 +30,6 @@ import androidx.lifecycle.ViewModelProviders
 import android.widget.TextView
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.*
-import androidx.lifecycle.Observer
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.CancellationToken
@@ -40,9 +39,9 @@ import kotlinx.android.synthetic.main.fragment_landing.*
 import org.w3c.dom.Text
 import java.util.*
 
-import androidx.lifecycle.Observer
 import java.io.File
 import android.graphics.BitmapFactory
+import androidx.lifecycle.Observer
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
