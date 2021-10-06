@@ -1,11 +1,17 @@
 package com.hkyriacou.mobile_project2
 
+import android.annotation.SuppressLint
 import android.content.Context
+
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.graphics.Bitmap
 import android.net.Uri
+
+import android.location.Location
+import android.location.LocationRequest
+
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -14,18 +20,38 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProviders
+
+import android.widget.TextView
+import androidx.core.widget.addTextChangedListener
+import androidx.lifecycle.*
+import androidx.lifecycle.Observer
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.CancellationToken
+import com.hkyriacou.mobile_project2.api.WeatherItem
+
 import kotlinx.android.synthetic.main.fragment_landing.*
+import org.w3c.dom.Text
 import java.util.*
+
 import androidx.lifecycle.Observer
 import java.io.File
 import android.graphics.BitmapFactory
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+
+
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.scalars.ScalarsConverterFactory
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -59,6 +85,7 @@ class LandingFragment : Fragment() {
     private val gameDetailViewModel: GameDetailViewModel by lazy {
         ViewModelProviders.of(this).get(GameDetailViewModel::class.java)
     }
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     interface Callbacks {
         fun moveToSavingFragment()
@@ -70,14 +97,13 @@ class LandingFragment : Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         callbacks = context as Callbacks?
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
 
         super.onCreate(savedInstanceState)
-
-
 
         game = Game()
         arguments?.let {
@@ -113,6 +139,7 @@ class LandingFragment : Fragment() {
         awayName.setText( game.teamBName )
 
     }
+    @SuppressLint("FragmentLiveDataObserve", "MissingPermission")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -173,6 +200,29 @@ class LandingFragment : Fragment() {
 //
 //            }
 //        })
+        var lat : Int = 0
+        var lon : Int = 0
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location : Location? ->
+                // Got last known location. In some rare situations this can be null.
+                //Log.d(TAG, "LAT: ${123}, LON: ${412}")
+                if (location != null) {
+
+                    lat = location.latitude.toInt()
+                    lon = location.longitude.toInt()
+                    Log.d(TAG, "LAT: ${lat}, LON: ${lon}")
+                }
+            }
+
+        val weatherLiveData: LiveData<WeatherItem> = WeatherFetchr().fetchCoordsWeather(lat, lon)
+        weatherLiveData.observe(
+            this,
+            Observer { res ->
+                Log.d(TAG, "Response received: ${res.temp}")
+                val weatherTxt : TextView = view.findViewById(R.id.weatherInfo)
+                val tempFaren : Double = (res.temp.toDouble() - 273.15) * 9/5 + 32
+                weatherTxt.setText("Weather @ ${lat}:${lon}: ${tempFaren}ºF")
+            })
 
         val btnH3 : Button = view.findViewById(R.id.btn3Home)
         btnH3.setOnClickListener {

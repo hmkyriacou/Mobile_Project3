@@ -14,6 +14,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Weather Information"
+            android:id="@+id/weatherInfo" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:padding="24dp"
             android:text="Mobile Project 2" />
         <LinearLayout
