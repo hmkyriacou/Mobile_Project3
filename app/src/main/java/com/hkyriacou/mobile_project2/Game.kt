@@ -11,7 +11,9 @@ data class Game(@PrimaryKey val id: UUID = UUID.randomUUID(),
                 var teamBName:String = "",
                 var teamAScore:Int = 0,
                 var teamBScore:Int = 0,
-                var date: Date = Date()
+                var date: Date = Date(),
+                //var teamAImage: ByteArray = ByteArray(0)
+                //var teamAImage: ByteArray? = null
 )  {
     val photoFileName
         get() = "IMG_$id.jpg"

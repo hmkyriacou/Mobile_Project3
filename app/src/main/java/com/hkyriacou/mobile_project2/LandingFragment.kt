@@ -18,12 +18,14 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.fragment_landing.*
 import java.util.*
 import androidx.lifecycle.Observer
 import java.io.File
+import android.graphics.BitmapFactory
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -308,11 +310,17 @@ class LandingFragment : Fragment() {
             }
         }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Log.d(TAG,"hey whats up")
         if(requestCode == REQUEST_PHOTO && resultCode == AppCompatActivity.RESULT_OK) {
             val bMap: Bitmap = data?.extras?.get("data") as Bitmap
-            game.bMapHome = bMap
-            homePhotoView.setImageBitmap(game.bMapHome)
+
+//            val bos = ByteArrayOutputStream()
+//            bMap.compress(Bitmap.CompressFormat.JPEG, 100, bos)
+//            val img: ByteArray = bos.toByteArray()
+//            game.teamAImage = img
+//
+//            homePhotoView.setImageBitmap(ByteArrayToBitmap(game.teamAImage))
+
+            homePhotoView.setImageBitmap(bMap)
         }
 
     }
@@ -325,7 +333,10 @@ class LandingFragment : Fragment() {
         }
     }
 
-
+    fun ByteArrayToBitmap(byteArray: ByteArray?): Bitmap? {
+        val arrayInputStream = ByteArrayInputStream(byteArray)
+        return BitmapFactory.decodeStream(arrayInputStream)
+    }
 
 
 
