@@ -283,44 +283,23 @@ class LandingFragment : Fragment() {
             startActivityForResult(intent, REQUEST_PHOTO)
         }
 
-        //DONT ADD TO DATABASE IF WE LEAVE TO CAMERA
-        awayPhotoButton.apply {
-                val packageManager: PackageManager = requireActivity().packageManager
-                val captureImage = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                val resolvedActivity: ResolveInfo? =
-                    packageManager.resolveActivity(captureImage,
-                        PackageManager.MATCH_DEFAULT_ONLY)
-                if (resolvedActivity == null) {
-                    isEnabled = false
-                }
-                setOnClickListener {
+        awayPhotoButton.setOnClickListener {
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            startActivityForResult(intent, 3)
+        }
 
-                    captureImage.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-                    val cameraActivities: List<ResolveInfo> =
-                        packageManager.queryIntentActivities(captureImage,
-                            PackageManager.MATCH_DEFAULT_ONLY)
-                    for (cameraActivity in cameraActivities) {
-                        requireActivity().grantUriPermission(
-                            cameraActivity.activityInfo.packageName,
-                            photoUri,
-                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                    }
-                    startActivityForResult(captureImage, REQUEST_PHOTO)
-                }
-            }
         }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if(requestCode == REQUEST_PHOTO && resultCode == AppCompatActivity.RESULT_OK) {
             val bMap: Bitmap = data?.extras?.get("data") as Bitmap
 
-//            val bos = ByteArrayOutputStream()
-//            bMap.compress(Bitmap.CompressFormat.JPEG, 100, bos)
-//            val img: ByteArray = bos.toByteArray()
-//            game.teamAImage = img
-//
-//            homePhotoView.setImageBitmap(ByteArrayToBitmap(game.teamAImage))
 
             homePhotoView.setImageBitmap(bMap)
+        } else if(requestCode == 3 && resultCode == AppCompatActivity.RESULT_OK) {
+            val bMap: Bitmap = data?.extras?.get("data") as Bitmap
+
+
+            awayPhotoView.setImageBitmap(bMap)
         }
 
     }
