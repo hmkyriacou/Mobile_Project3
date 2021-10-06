@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.room.Room
 import com.hkyriacou.mobile_project2.database.GameDatabase
+import java.io.File
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -12,6 +13,7 @@ private const val DATABASE_NAME = "table_game"
 class GameRepository private constructor(context: Context) {
 
     private val executor = Executors.newSingleThreadExecutor()
+    private val filesDir = context.applicationContext.filesDir
 
     private val database : GameDatabase = Room.databaseBuilder(
         context.applicationContext,
@@ -31,9 +33,11 @@ class GameRepository private constructor(context: Context) {
     }
     fun addGame(game: Game) {
         executor.execute{
+
             gameDao.addGame(game)
         }
     }
+    fun getPhotoFile(game: Game): File = File(filesDir, game.photoFileName)
 
     companion object {
         private var INSTANCE: GameRepository? = null

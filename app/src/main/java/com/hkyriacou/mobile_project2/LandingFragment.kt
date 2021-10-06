@@ -2,17 +2,31 @@ package com.hkyriacou.mobile_project2
 
 import android.annotation.SuppressLint
 import android.content.Context
+
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
+import android.graphics.Bitmap
+import android.net.Uri
+
 import android.location.Location
 import android.location.LocationRequest
+
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
+import android.provider.MediaStore
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+
+import android.widget.ImageButton
+import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
+import androidx.lifecycle.ViewModelProviders
+
 import android.widget.TextView
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.*
@@ -21,14 +35,24 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.CancellationToken
 import com.hkyriacou.mobile_project2.api.WeatherItem
+
 import kotlinx.android.synthetic.main.fragment_landing.*
 import org.w3c.dom.Text
 import java.util.*
+
+import androidx.lifecycle.Observer
+import java.io.File
+import android.graphics.BitmapFactory
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+
+
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
+
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -38,6 +62,7 @@ private const val ARG_PARAM2 = "param2"
 private const val TAG = "LandingFragment"
 private const val KEY_HOMESCORE = "homeScore"
 private const val KEY_AWAYSCORE = "guestScore"
+private const val REQUEST_PHOTO = 2
 
 /**
  * A simple [Fragment] subclass.
@@ -49,6 +74,14 @@ class LandingFragment : Fragment() {
     private var param1: UUID? = null
     private var param2: String? = null
     private lateinit var game: Game
+    private lateinit var photoFile: File
+    private lateinit var photoUri: Uri
+
+
+    private lateinit var homePhotoButton: ImageButton
+    private lateinit var homePhotoView: ImageView
+    private lateinit var awayPhotoButton: ImageButton
+    private lateinit var awayPhotoView: ImageView
     private val gameDetailViewModel: GameDetailViewModel by lazy {
         ViewModelProviders.of(this).get(GameDetailViewModel::class.java)
     }
@@ -90,6 +123,10 @@ class LandingFragment : Fragment() {
             Observer { game ->
                 game?.let {
                     this.game=game
+                    photoFile = gameDetailViewModel.getPhotoFile(game)
+                    photoUri = FileProvider.getUriForFile(requireActivity(),
+                        "com.hkyriacou.mobile_project2.fileprovider",
+                        photoFile)
                     updateUI()
                 }
             }
@@ -110,6 +147,41 @@ class LandingFragment : Fragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_landing, container, false)
         // ViewModel stuff
+        homePhotoButton = view.findViewById(R.id.home_camera) as ImageButton
+        homePhotoView = view.findViewById(R.id.home_photo) as ImageView
+        awayPhotoButton = view.findViewById(R.id.away_camera) as ImageButton
+        awayPhotoView = view.findViewById(R.id.away_photo) as ImageView
+
+        /*awayPhotoButton.apply {
+            val packageManager: PackageManager = requireActivity().packageManager
+            val captureImage = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            val resolvedActivity: ResolveInfo? =
+                packageManager.resolveActivity(
+                    captureImage,
+                    PackageManager.MATCH_DEFAULT_ONLY
+                )
+            if (resolvedActivity == null) {
+                isEnabled = false
+            }
+            setOnClickListener {
+                captureImage.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                val cameraActivities: List<ResolveInfo> =
+                    packageManager.queryIntentActivities(
+                        captureImage,
+                        PackageManager.MATCH_DEFAULT_ONLY
+                    )
+                for (cameraActivity in cameraActivities) {
+                    requireActivity().grantUriPermission(
+                        cameraActivity.activityInfo.packageName,
+                        photoUri,
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    )
+                }
+                startActivityForResult(captureImage, 1)
+            }
+        }*/
+
+
 
 
 
@@ -249,6 +321,38 @@ class LandingFragment : Fragment() {
         callbacks = null
     }
 
+    override fun onStart(){
+        super.onStart()
+
+       /* awayPhotoButton.setOnClickListener {
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            startActivityForResult(intent, 1)
+        }*/
+        homePhotoButton.setOnClickListener {
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            startActivityForResult(intent, REQUEST_PHOTO)
+        }
+
+        awayPhotoButton.setOnClickListener {
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            startActivityForResult(intent, 3)
+        }
+
+        }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if(requestCode == REQUEST_PHOTO && resultCode == AppCompatActivity.RESULT_OK) {
+            val bMap: Bitmap = data?.extras?.get("data") as Bitmap
+
+
+            homePhotoView.setImageBitmap(bMap)
+        } else if(requestCode == 3 && resultCode == AppCompatActivity.RESULT_OK) {
+            val bMap: Bitmap = data?.extras?.get("data") as Bitmap
+
+
+            awayPhotoView.setImageBitmap(bMap)
+        }
+
+    }
     override fun onStop(){
         super.onStop()
         game.teamAName = homeName.text.toString()
@@ -257,6 +361,13 @@ class LandingFragment : Fragment() {
             gameDetailViewModel.saveGame(game)
         }
     }
+
+    fun ByteArrayToBitmap(byteArray: ByteArray?): Bitmap? {
+        val arrayInputStream = ByteArrayInputStream(byteArray)
+        return BitmapFactory.decodeStream(arrayInputStream)
+    }
+
+
 
     companion object {
         /**
