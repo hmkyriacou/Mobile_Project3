@@ -20,8 +20,11 @@ class GameDetailViewModel(): ViewModel() {
         gameIdLiveData.value = gameId
     }
     fun saveGame(game: Game){
-
+        if (gameRepository.getGame(game.id) == null) {
             gameRepository.addGame(game)
+        } else {
+            gameRepository.updateGame(game)
+        }
 
     }
     fun getPhotoFile(game: Game): File {

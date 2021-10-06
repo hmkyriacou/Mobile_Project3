@@ -1,6 +1,5 @@
 package com.hkyriacou.mobile_project2
 
-import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -9,8 +8,6 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -19,10 +16,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import androidx.core.widget.addTextChangedListener
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.fragment_landing.*
@@ -281,11 +276,11 @@ class LandingFragment : Fragment() {
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             startActivityForResult(intent, 1)
         }*/
- /*       homePhotoButton.setOnClickListener {
+        homePhotoButton.setOnClickListener {
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             startActivityForResult(intent, REQUEST_PHOTO)
         }
-*/
+
         //DONT ADD TO DATABASE IF WE LEAVE TO CAMERA
         awayPhotoButton.apply {
                 val packageManager: PackageManager = requireActivity().packageManager
@@ -314,6 +309,12 @@ class LandingFragment : Fragment() {
         }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d(TAG,"hey whats up")
+        if(requestCode == REQUEST_PHOTO && resultCode == AppCompatActivity.RESULT_OK) {
+            val bMap: Bitmap = data?.extras?.get("data") as Bitmap
+            game.bMapHome = bMap
+            homePhotoView.setImageBitmap(game.bMapHome)
+        }
+
     }
     override fun onStop(){
         super.onStop()

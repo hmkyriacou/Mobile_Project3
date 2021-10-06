@@ -33,6 +33,7 @@ class GameRepository private constructor(context: Context) {
     }
     fun addGame(game: Game) {
         executor.execute{
+
             gameDao.addGame(game)
         }
     }
