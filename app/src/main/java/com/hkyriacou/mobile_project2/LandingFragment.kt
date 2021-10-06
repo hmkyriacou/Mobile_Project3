@@ -2,6 +2,8 @@ package com.hkyriacou.mobile_project2
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.location.Location
+import android.location.LocationRequest
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -17,6 +19,7 @@ import androidx.lifecycle.*
 import androidx.lifecycle.Observer
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.CancellationToken
 import com.hkyriacou.mobile_project2.api.WeatherItem
 import kotlinx.android.synthetic.main.fragment_landing.*
 import org.w3c.dom.Text
@@ -61,13 +64,14 @@ class LandingFragment : Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         callbacks = context as Callbacks?
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
 
         super.onCreate(savedInstanceState)
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
         game = Game()
         arguments?.let {
             param1 = if(arguments?.getSerializable(ARG_PARAM1) == null){game.id}
@@ -98,7 +102,7 @@ class LandingFragment : Fragment() {
         awayName.setText( game.teamBName )
 
     }
-    @SuppressLint("FragmentLiveDataObserve")
+    @SuppressLint("FragmentLiveDataObserve", "MissingPermission")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -124,16 +128,28 @@ class LandingFragment : Fragment() {
 //
 //            }
 //        })
+        var lat : Int = 0
+        var lon : Int = 0
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location : Location? ->
+                // Got last known location. In some rare situations this can be null.
+                //Log.d(TAG, "LAT: ${123}, LON: ${412}")
+                if (location != null) {
 
+                    lat = location.latitude.toInt()
+                    lon = location.longitude.toInt()
+                    Log.d(TAG, "LAT: ${lat}, LON: ${lon}")
+                }
+            }
 
-        val weatherLiveData: LiveData<WeatherItem> = WeatherFetchr().fetchWorcesterWeather()
+        val weatherLiveData: LiveData<WeatherItem> = WeatherFetchr().fetchCoordsWeather(lat, lon)
         weatherLiveData.observe(
             this,
             Observer { res ->
                 Log.d(TAG, "Response received: ${res.temp}")
                 val weatherTxt : TextView = view.findViewById(R.id.weatherInfo)
                 val tempFaren : Double = (res.temp.toDouble() - 273.15) * 9/5 + 32
-                weatherTxt.setText("Worcester: ${tempFaren}ºF")
+                weatherTxt.setText("Weather @ ${lat}:${lon}: ${tempFaren}ºF")
             })
 
         val btnH3 : Button = view.findViewById(R.id.btn3Home)

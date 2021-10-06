@@ -46,4 +46,24 @@ class WeatherFetchr {
         return responseLiveData
     }
 
+    fun fetchCoordsWeather(lat : Int, lon : Int): LiveData<WeatherItem> {
+        val responseLiveData: MutableLiveData<WeatherItem> = MutableLiveData()
+        val weatherRequest: Call<WeatherResponse> = weatherApi.fetchCoordsWeather(lat, lon)
+        weatherRequest.enqueue(object : Callback<WeatherResponse> {
+            override fun onFailure(call: Call<WeatherResponse>, t: Throwable) {
+                Log.e(TAG, "Failed to fetch weather", t)
+            }
+            override fun onResponse(
+                call: Call<WeatherResponse>,
+                response: Response<WeatherResponse>
+            ){
+                Log.d(TAG, "Response received")
+                val weatherResponse: WeatherResponse? = response.body()
+                val item: WeatherItem? = weatherResponse?.main
+                responseLiveData.value = item
+            }
+        })
+        return responseLiveData
+    }
+
 }
